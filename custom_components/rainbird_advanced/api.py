@@ -10,6 +10,7 @@ Nothing outside this module should call the pyrainbird controller directly.
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import random
 from collections.abc import Awaitable, Callable
@@ -39,8 +40,21 @@ def async_create_device_session(hass: HomeAssistant) -> aiohttp.ClientSession:
 async def async_create_api(
     session: aiohttp.ClientSession, host: str, password: str
 ) -> RainbirdApi:
-    """Connect to a controller and wrap it."""
-    controller = await create_controller(session, host, password, min_delay=MIN_DELAY)
+    """Connect to a controller and wrap it.
+
+    min_delay was only added to create_controller in pyrainbird 6.5.0. Home
+    Assistant loads a single pyrainbird for the whole process, so while the
+    official rainbird integration is installed its older pin (6.3.x) wins and
+    min_delay is rejected. We degrade gracefully: our own lock is what actually
+    serializes access, so losing the library's inter-request pacing is
+    harmless.
+    """
+    if "min_delay" in inspect.signature(create_controller).parameters:
+        controller = await create_controller(
+            session, host, password, min_delay=MIN_DELAY
+        )
+    else:
+        controller = await create_controller(session, host, password)
     return RainbirdApi(controller)
 
 

@@ -1,7 +1,7 @@
 {
   "domain": "rainbird_advanced",
   "name": "Rain Bird Advanced",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "codeowners": ["@mdespeuilles"],
   "config_flow": true,
   "documentation": "https://github.com/mdespeuilles/rainbird_advanced",
@@ -9,5 +9,5 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "loggers": ["pyrainbird"],
-  "requirements": ["pyrainbird==6.5.0"]
+  "requirements": ["pyrainbird>=6.3.1"]
 }
