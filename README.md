@@ -246,4 +246,4 @@ MIT
 [hacs]: https://github.com/hacs/integration
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg
 [pyrainbird]: https://github.com/allenporter/pyrainbird
-[issues]: https://github.com/maxence/rainbird_advanced/issues
+[issues]: https://github.com/mdespeuilles/rainbird_advanced/issues
