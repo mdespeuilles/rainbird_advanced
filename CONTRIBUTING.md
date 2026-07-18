@@ -50,9 +50,20 @@ api.py           Lock + backoff. The ONLY module that touches the controller.
 coordinator.py   Fast state poll (30s) + slow schedule poll (1h).
 run_tracker.py   Transition detection + Store persistence.
 program_infer.py Timeline cross-reference for the program sensor.
-sensor.py        Entities.
+entity.py        Base entities + RainbirdControlMixin (control + refresh).
+sensor.py        Read-only sensors.
+binary_sensor.py Rain sensor.
+switch.py        Zone on/off + the start_irrigation entity service.
+number.py        Per-zone duration setpoints + rain delay.
+button.py        Stop, advance, run program A/B/C.
+calendar.py      Upcoming waterings from the schedule timeline.
 services.py      raw_command.
 ```
+
+All control goes through `RainbirdControlMixin._async_control`, which routes to
+`api.execute()` (so it takes the single device lock), surfaces device errors as
+`HomeAssistantError`, and requests a debounced refresh so state entities catch
+up. Never call the controller from an entity directly.
 
 Two rules worth knowing before you change things:
 
@@ -92,12 +103,16 @@ it as "every zone stopped" and write a bogus run.
 
 ## Adding an entity
 
-1. Add the class to `sensor.py`, extending `RainbirdAdvEntity` (fast coordinator)
-   or `RainbirdAdvScheduleEntity` (hourly). Needing both? See
-   `RainbirdActiveProgramSensor` — it subscribes to the second one manually.
-2. Register it in `async_setup_entry`.
+1. Put it in the platform file for its kind (`sensor.py`, `switch.py`, …),
+   extending `RainbirdAdvEntity` (fast coordinator) or `RainbirdAdvScheduleEntity`
+   (hourly). Needing both? See `RainbirdActiveProgramSensor` — it subscribes to
+   the second one manually. If it commands the device, also mix in
+   `RainbirdControlMixin` and call `self._async_control(...)`.
+2. Register it in that platform's `async_setup_entry`, and make sure the
+   platform is listed in `PLATFORMS` in `__init__.py`.
 3. Add `translation_key` entries to `strings.json`, `translations/en.json` and
-   `translations/fr.json`, and an icon to `icons.json`. No `_attr_icon`.
+   `translations/fr.json`, and an icon to `icons.json` (optional). No
+   `_attr_icon`.
 4. Add a test.
 
 **Do not add a request to the 30 s cycle without a good reason.** It is two

@@ -100,10 +100,18 @@ class RainbirdAdvData:
     api: RainbirdApi
     model_info: ModelAndVersion
     mac_address: str
+    host: str
     zones: list[int]
     coordinator: RainbirdAdvStateCoordinator
     schedule_coordinator: RainbirdAdvScheduleCoordinator
     tracker: ZoneRunTracker
+    zone_durations: dict[int, int]
+    """Per-zone run duration in minutes, the setpoint a zone switch uses.
+
+    A local setpoint, not read from the device: the duration number entity
+    writes here and the switch reads it, so turning a switch on runs the zone
+    for the duration currently shown on its number.
+    """
 
 
 type RainbirdAdvConfigEntry = ConfigEntry[RainbirdAdvData]

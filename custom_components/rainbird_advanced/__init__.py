@@ -23,6 +23,7 @@ from .const import (
     CONF_ZONE_FLOW_RATES,
     CONF_ZONES,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_ZONE_DURATION,
     DOMAIN,
     STORAGE_VERSION,
 )
@@ -33,7 +34,14 @@ from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.CALENDAR,
+    Platform.NUMBER,
+    Platform.SENSOR,
+    Platform.SWITCH,
+]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -101,14 +109,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: RainbirdAdvConfigEntry) 
     # give us every other sensor.
     await schedule_coordinator.async_refresh()
 
+    zones = entry.data.get(CONF_ZONES, probe["zones"])
     entry.runtime_data = RainbirdAdvData(
         api=api,
         model_info=probe["model_info"],
         mac_address=entry.data[CONF_MAC],
-        zones=entry.data.get(CONF_ZONES, probe["zones"]),
+        host=entry.data[CONF_HOST],
+        zones=zones,
         coordinator=coordinator,
         schedule_coordinator=schedule_coordinator,
         tracker=tracker,
+        # Seeded to the default; the duration number entities overwrite each
+        # entry from restored state as they are added.
+        zone_durations=dict.fromkeys(zones, DEFAULT_ZONE_DURATION),
     )
 
     async def _async_flush_history() -> None:

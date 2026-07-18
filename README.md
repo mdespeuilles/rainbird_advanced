@@ -2,19 +2,28 @@
 
 [![hacs][hacs-badge]][hacs]
 
-A Home Assistant custom integration that exposes what the official `rainbird`
-integration does not: which zone is watering, which program is believed to be
-running, and a persisted per-zone history of run times and estimated volumes.
+A Home Assistant custom integration for Rain Bird controllers that **replaces**
+the official `rainbird` integration with a more complete one: it keeps zone
+control, the rain delay, the rain sensor and the schedule calendar, and adds
+what the official one leaves out — a clean active-zone sensor, an inferred
+active program, per-zone run history with estimated volumes, program buttons,
+and a raw-command tool for exploration.
 
-It talks to the controller over the **local** API only (`http://<ip>/stick`) and
-is designed to **run alongside the official integration**, not replace it.
+It talks to the controller over the **local** API only (`http://<ip>/stick`).
 
 Built for a **Rain Bird ESP-TM2 + LNK2 WiFi module**. Other LNK/LNK2 controllers
 supported by [pyrainbird][pyrainbird] should work, but are untested.
 
+> **This is a replacement.** Install it, confirm it works, then **remove the
+> official Rain Bird integration** — running both leaves two clients competing
+> for the controller's single connection and two sets of zone switches. See
+> [Migrating from the official integration](#migrating-from-the-official-integration).
+
 ---
 
 ## What you get
+
+### Monitor
 
 | Entity | What it is |
 | --- | --- |
@@ -25,10 +34,25 @@ supported by [pyrainbird][pyrainbird] should work, but are untested.
 | `sensor.…_zone_N_last_run_at` | When zone N last **started** watering. |
 | `sensor.…_zone_N_estimated_volume` | Estimated volume of zone N's last run, in liters. |
 | `sensor.…_zone_N_total_volume` | Cumulative estimated volume for zone N. This is the one eligible for Home Assistant's water dashboard. |
+| `binary_sensor.…_rain_sensor` | Whether the rain sensor is signalling rain. |
+| `calendar.…_watering_schedule` | Upcoming scheduled waterings. |
+
+### Control
+
+| Entity | What it does |
+| --- | --- |
+| `switch.…_zone_N` | Start (for the zone's configured duration) or stop watering zone N. |
+| `number.…_zone_N_run_duration` | How many minutes the zone N switch runs. A local setpoint, persisted. |
+| `number.…_rain_delay` | The rain delay, in days. |
+| `button.…_stop_watering` | Stop all irrigation. |
+| `button.…_advance_zone` | Advance to the next zone. |
+| `button.…_run_program_A/B/C` | Manually run a full program. |
+| `rainbird_advanced.start_irrigation` | Run a targeted zone for an explicit duration (service). |
 | `rainbird_advanced.raw_command` | Send an arbitrary command to the controller, for exploration and debugging. Admin only. |
 
-History survives restarts, and the entities attach to the **same device card**
-as the official integration.
+History survives restarts. During a migration the entities attach to the **same
+device card** as the official integration, so you see one Rain Bird device, not
+two.
 
 ---
 
@@ -128,35 +152,42 @@ Options (⚙ on the integration card):
 - **Flow rate per zone** — in L/min. Leave at `0` to leave a zone's volume
   unknown.
 
+Each zone also gets a **run-duration** number entity (how long its switch runs
+it) and there is a device-wide **rain delay** number.
+
 ---
 
-## Running alongside the official integration
+## Migrating from the official integration
 
-**This is supported and expected.** The two integrations share a device card and
-do not conflict over entity ids.
+The two are designed to run side by side **during migration only**:
 
-The one real constraint: **the LNK2 answers one connection at a time.** With
-both integrations running, plus perhaps the Rain Bird phone app, requests will
-occasionally collide and the device replies "busy" (HTTP 503).
+1. Install and configure Rain Bird Advanced (above).
+2. Confirm the new entities work — turn a zone on and off, check the sensors.
+3. Move any automations, dashboards and scripts to the new entity ids
+   (`switch.…`, `number.…`, etc.). The device card is shared, so this is a
+   rename, not a re-discovery.
+4. **Remove the official Rain Bird integration** (its entry → ⋮ → Delete).
 
-This is handled rather than papered over:
+**Why remove it.** The LNK2 answers one connection at a time. Two integrations
+polling the same controller collide (the device replies "busy", HTTP 503), and
+you would also have two zone switches for every zone. Once the official one is
+gone, Rain Bird Advanced is the sole client and collisions essentially
+disappear.
 
-- every request is serialized through a single lock
-- requests are paced, and retried with jittered backoff on a busy response —
-  the jitter matters, otherwise a 30 s and a 60 s poller phase-align and collide
-  forever
+While both are installed, the collisions are handled rather than papered over:
+
+- every request is serialized through a single lock, paced, and retried with
+  jittered backoff on a busy response — the jitter matters, otherwise a 30 s and
+  a 60 s poller phase-align and collide forever
 - a busy device means *healthy but occupied*, so entities **hold their last
-  known value** rather than flapping to `unavailable`; only a sustained failure
-  marks them unavailable
+  known value** rather than flapping to `unavailable`
 
 Worth knowing: pyrainbird has its own retry logic, but it is disabled for the
 ESP-TM2 (`retries: false` in its model table), so on that controller the backoff
 here is the only one there is.
 
-If you see persistent busy warnings, raise the polling interval in the options.
-
 > The Rain Bird 2.0 app and firmware are not compatible with Home Assistant at
-> all — that is upstream, and applies to the official integration too.
+> all — that is upstream, and applied to the official integration too.
 
 ---
 

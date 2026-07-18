@@ -62,9 +62,37 @@
       "zone_last_run_at": { "name": "Zone {zone} dernier arrosage" },
       "zone_estimated_volume": { "name": "Zone {zone} volume estimé" },
       "zone_total_volume": { "name": "Zone {zone} volume total" }
+    },
+    "switch": {
+      "zone": { "name": "Zone {zone}" }
+    },
+    "binary_sensor": {
+      "rain_sensor": { "name": "Capteur de pluie" }
+    },
+    "number": {
+      "zone_duration": { "name": "Zone {zone} durée d'arrosage" },
+      "rain_delay": { "name": "Report pour pluie" }
+    },
+    "button": {
+      "stop": { "name": "Arrêter l'arrosage" },
+      "advance": { "name": "Zone suivante" },
+      "run_program": { "name": "Lancer le programme {program}" }
+    },
+    "calendar": {
+      "schedule": { "name": "Planning d'arrosage" }
     }
   },
   "services": {
+    "start_irrigation": {
+      "name": "Démarrer l'arrosage",
+      "description": "Lance une zone pour une durée précise, en ignorant la durée configurée de la zone.",
+      "fields": {
+        "duration": {
+          "name": "Durée",
+          "description": "Durée de fonctionnement de la zone, en minutes."
+        }
+      }
+    },
     "raw_command": {
       "name": "Commande brute",
       "description": "Envoie une commande arbitraire au contrôleur, pour explorer le protocole et déboguer. Réservé aux administrateurs. Les commandes de lecture passent directement ; celles qui agissent sur le contrôleur exigent « Autoriser les commandes dangereuses ».",

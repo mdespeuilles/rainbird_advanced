@@ -30,6 +30,21 @@ views:
             {% endif %}
 
       - type: entities
+        title: Manual control
+        entities:
+          - entity: switch.esp_tm2_advanced_zone_1
+            secondary_info: last-changed
+          - entity: number.esp_tm2_advanced_zone_1_run_duration
+            name: Zone 1 duration
+          - entity: switch.esp_tm2_advanced_zone_2
+          - entity: number.esp_tm2_advanced_zone_2_run_duration
+            name: Zone 2 duration
+          - type: divider
+          - entity: number.esp_tm2_advanced_rain_delay
+          - entity: button.esp_tm2_advanced_stop_watering
+          - entity: button.esp_tm2_advanced_run_program_a
+
+      - type: entities
         title: Controller
         entities:
           - entity: sensor.esp_tm2_advanced_controller_mode

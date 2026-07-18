@@ -16,9 +16,25 @@
       "zone_last_run_at": { "default": "mdi:clock-outline" },
       "zone_estimated_volume": { "default": "mdi:water" },
       "zone_total_volume": { "default": "mdi:water-plus" }
+    },
+    "switch": {
+      "zone": { "default": "mdi:sprinkler" }
+    },
+    "binary_sensor": {
+      "rain_sensor": { "default": "mdi:weather-rainy" }
+    },
+    "number": {
+      "zone_duration": { "default": "mdi:timer-cog-outline" },
+      "rain_delay": { "default": "mdi:weather-rainy" }
+    },
+    "button": {
+      "stop": { "default": "mdi:stop" },
+      "advance": { "default": "mdi:skip-next" },
+      "run_program": { "default": "mdi:play-circle-outline" }
     }
   },
   "services": {
+    "start_irrigation": { "service": "mdi:sprinkler" },
     "raw_command": { "service": "mdi:console" }
   }
 }

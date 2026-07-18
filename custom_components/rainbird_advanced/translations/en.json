@@ -62,9 +62,37 @@
       "zone_last_run_at": { "name": "Zone {zone} last run at" },
       "zone_estimated_volume": { "name": "Zone {zone} estimated volume" },
       "zone_total_volume": { "name": "Zone {zone} total volume" }
+    },
+    "switch": {
+      "zone": { "name": "Zone {zone}" }
+    },
+    "binary_sensor": {
+      "rain_sensor": { "name": "Rain sensor" }
+    },
+    "number": {
+      "zone_duration": { "name": "Zone {zone} run duration" },
+      "rain_delay": { "name": "Rain delay" }
+    },
+    "button": {
+      "stop": { "name": "Stop watering" },
+      "advance": { "name": "Advance zone" },
+      "run_program": { "name": "Run program {program}" }
+    },
+    "calendar": {
+      "schedule": { "name": "Watering schedule" }
     }
   },
   "services": {
+    "start_irrigation": {
+      "name": "Start irrigation",
+      "description": "Run a zone for a specific duration, overriding the zone's configured run duration.",
+      "fields": {
+        "duration": {
+          "name": "Duration",
+          "description": "How long to run the zone, in minutes."
+        }
+      }
+    },
     "raw_command": {
       "name": "Raw command",
       "description": "Send an arbitrary command to the controller, for protocol exploration and debugging. Admin only. Read commands run as-is; commands that act on the controller require 'Allow unsafe commands'.",

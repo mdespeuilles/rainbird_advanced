@@ -89,6 +89,26 @@ class RainbirdApi:
                 await asyncio.sleep(delay + random.uniform(0, BUSY_JITTER))
         raise AssertionError("unreachable")
 
+    async def irrigate_zone(self, zone: int, minutes: int) -> None:
+        """Start a single zone for the given number of minutes."""
+        await self.execute(lambda: self._controller.irrigate_zone(zone, minutes))
+
+    async def stop_irrigation(self) -> None:
+        """Stop all irrigation."""
+        await self.execute(self._controller.stop_irrigation)
+
+    async def set_rain_delay(self, days: int) -> None:
+        """Set the rain delay in days."""
+        await self.execute(lambda: self._controller.set_rain_delay(days))
+
+    async def run_program(self, program: int) -> None:
+        """Manually run a full program by 0-based index."""
+        await self.execute(lambda: self._controller.set_program(program))
+
+    async def advance_zone(self, steps: int = 1) -> None:
+        """Advance irrigation to a later zone."""
+        await self.execute(lambda: self._controller.advance_zone(steps))
+
     async def async_close(self) -> None:
         """Release resources."""
 

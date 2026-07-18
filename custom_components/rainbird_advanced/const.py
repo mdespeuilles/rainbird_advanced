@@ -23,6 +23,18 @@ MIN_SCAN_INTERVAL: Final = 15
 MAX_SCAN_INTERVAL: Final = 600
 DEFAULT_FLOW_RATE: Final = 0.0
 
+# Per-zone run duration (minutes) the switch uses when turned on.
+DEFAULT_ZONE_DURATION: Final = 6
+MIN_ZONE_DURATION: Final = 1
+MAX_ZONE_DURATION: Final = 240
+
+# Rain delay bounds, in days.
+MAX_RAIN_DELAY: Final = 14
+
+# After a control action, refresh soon so the state sensors catch up without
+# waiting for the next scheduled poll. Debounced by the coordinator.
+CONTROL_REFRESH_DELAY: Final = 2
+
 SCHEDULE_UPDATE_INTERVAL: Final = timedelta(hours=1)
 
 # Spacing pyrainbird enforces between consecutive requests on the same client.
@@ -63,6 +75,8 @@ STORAGE_VERSION: Final = 1
 
 # Services
 SERVICE_RAW_COMMAND: Final = "raw_command"
+SERVICE_START_IRRIGATION: Final = "start_irrigation"
+ATTR_DURATION: Final = "duration"
 ATTR_CONFIG_ENTRY_ID: Final = "config_entry_id"
 ATTR_COMMAND: Final = "command"
 ATTR_PARAMS: Final = "params"
