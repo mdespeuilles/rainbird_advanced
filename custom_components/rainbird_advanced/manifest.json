@@ -1,13 +1,19 @@
 {
   "domain": "rainbird_advanced",
   "name": "Rain Bird Advanced",
-  "version": "1.1.1",
-  "codeowners": ["@mdespeuilles"],
+  "version": "1.2.0",
+  "codeowners": [
+    "@mdespeuilles"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/mdespeuilles/rainbird_advanced",
   "issue_tracker": "https://github.com/mdespeuilles/rainbird_advanced/issues",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "loggers": ["pyrainbird"],
-  "requirements": ["pyrainbird>=6.3.1"]
+  "loggers": [
+    "pyrainbird"
+  ],
+  "requirements": [
+    "pyrainbird>=6.3.1"
+  ]
 }
