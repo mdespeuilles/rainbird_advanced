@@ -27,6 +27,13 @@ _LOGGER = logging.getLogger(__name__)
 
 CONNECTION_LIMIT = 1
 
+# Hard per-request ceiling. pyrainbird only installs its own 10s timeout when
+# min_delay is set (6.5.0+); on 6.3.x there is none, so aiohttp's 5-minute
+# default would apply and a request that never gets answered -- e.g. while the
+# official integration holds the device's single connection -- could hang
+# startup for minutes.
+REQUEST_TIMEOUT = 15.0
+
 
 def async_create_device_session(hass: HomeAssistant) -> aiohttp.ClientSession:
     """Create a session that opens at most one connection to the device.
@@ -34,7 +41,10 @@ def async_create_device_session(hass: HomeAssistant) -> aiohttp.ClientSession:
     Deliberately not async_create_clientsession(): that shares Home Assistant's
     connector pool, which would discard the connection limit.
     """
-    return aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=CONNECTION_LIMIT))
+    return aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(limit=CONNECTION_LIMIT),
+        timeout=aiohttp.ClientTimeout(total=REQUEST_TIMEOUT),
+    )
 
 
 async def async_create_api(

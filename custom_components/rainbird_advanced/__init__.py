@@ -105,9 +105,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: RainbirdAdvConfigEntry) 
     schedule_coordinator = RainbirdAdvScheduleCoordinator(hass, entry, api)
 
     await coordinator.async_config_entry_first_refresh()
-    # Non-raising: a device that will not surrender its schedule should still
-    # give us every other sensor.
-    await schedule_coordinator.async_refresh()
 
     zones = entry.data.get(CONF_ZONES, probe["zones"])
     entry.runtime_data = RainbirdAdvData(
@@ -131,6 +128,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: RainbirdAdvConfigEntry) 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Fetch the schedule in the background. It is a ~20-request read, made slower
+    # while the official integration also polls the single-connection device, so
+    # blocking startup on it can leave setup "starting" for a long time. The
+    # calendar and per-program sensors populate once it completes.
+    entry.async_create_background_task(
+        hass,
+        schedule_coordinator.async_refresh(),
+        f"{DOMAIN}_initial_schedule",
+    )
     return True
 
 
