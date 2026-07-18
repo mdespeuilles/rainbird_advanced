@@ -30,7 +30,7 @@ supported by [pyrainbird][pyrainbird] should work, but are untested.
 | `sensor.…_active_zone` | The zone currently watering. `active_zones` attribute lists all of them when several are open. |
 | `sensor.…_active_program` | The program believed to be running: `PGM A`/`B`/`C`, or `manual`. **Inferred** — see below. |
 | `sensor.…_program_A/B/C` | One per program. State is the **next run time**; attributes give the frequency (which days), start times, the zones **in watering order** with per-zone minutes, and the total duration. |
-| `sensor.…_controller_mode` | `idle` / `watering` / `rain_delayed` / `disabled`. **Not the physical dial** — see below. |
+| `sensor.…_controller_mode` | `idle` / `watering` / `rain_delayed`. **Not the physical dial** — see below. |
 | `sensor.…_zone_N_last_run_duration` | How long zone N last ran, in seconds. |
 | `sensor.…_zone_N_last_run_at` | When zone N last **started** watering. |
 | `sensor.…_zone_N_estimated_volume` | Estimated volume of zone N's last run, in liters. |
@@ -69,9 +69,11 @@ It is not in pyrainbird, and it is not in the command set the controller
 understands. The dial's state never travels over WiFi.
 
 `sensor.…_controller_mode` is offered instead. It is a **derived software
-state**, computed from the irrigation state, the rain delay and the global
-disable flag. **If you turn the dial to OFF, this sensor may still report
-`idle`.** It answers "what is the controller doing", not "where is the knob".
+state** — `watering` when a zone is open, `rain_delayed` when a rain delay is
+set, otherwise `idle`. **If you turn the dial to OFF, this sensor may still
+report `idle`.** It answers "what is the controller doing", not "where is the
+knob". (There is no reliable "controller off" signal on the local API, so no
+such state is reported.)
 
 ### It cannot read which program is running
 

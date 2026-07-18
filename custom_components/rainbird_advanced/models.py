@@ -47,8 +47,6 @@ class RainbirdAdvScheduleData:
     programs: list[Program]
     """The raw programs, so per-program detail sensors can describe them."""
 
-    global_disable: bool
-
 
 @dataclass(slots=True)
 class ZoneRun:

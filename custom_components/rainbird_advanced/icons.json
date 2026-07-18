@@ -9,8 +9,7 @@
         "state": {
           "idle": "mdi:water-pump-off",
           "watering": "mdi:sprinkler",
-          "rain_delayed": "mdi:weather-rainy",
-          "disabled": "mdi:cancel"
+          "rain_delayed": "mdi:weather-rainy"
         }
       },
       "zone_last_run_duration": { "default": "mdi:timer-outline" },

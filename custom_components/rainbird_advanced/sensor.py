@@ -31,7 +31,6 @@ from .const import (
     ATTR_TOTAL_DURATION,
     ATTR_UNRELIABLE,
     ATTR_ZONES,
-    CONTROLLER_MODE_DISABLED,
     CONTROLLER_MODE_IDLE,
     CONTROLLER_MODE_RAIN_DELAYED,
     CONTROLLER_MODE_WATERING,
@@ -163,11 +162,13 @@ class RainbirdActiveProgramSensor(RainbirdAdvEntity, SensorEntity):
 
 
 class RainbirdControllerModeSensor(RainbirdAdvEntity, SensorEntity):
-    """What the controller is doing.
+    """What the controller is doing right now.
 
-    This is a derived software state, NOT the position of the physical dial.
-    The local API exposes no dial reading at all, so turning the dial to OFF may
-    leave this sensor reporting idle.
+    A derived software state, NOT the physical dial position -- the local API
+    exposes no dial reading, so turning the dial to OFF may leave this reading
+    idle. There is likewise no reliable "controller disabled" signal over the
+    local API, so this reports only what can be observed: watering, a rain
+    delay, or idle.
     """
 
     _attr_translation_key = "controller_mode"
@@ -179,24 +180,12 @@ class RainbirdControllerModeSensor(RainbirdAdvEntity, SensorEntity):
         super().__init__(data)
         self._attr_unique_id = f"{data.mac_address}_controller_mode"
 
-    async def async_added_to_hass(self) -> None:
-        """Follow the schedule coordinator for the global disable flag."""
-        await super().async_added_to_hass()
-        self.async_on_remove(
-            self._data.schedule_coordinator.async_add_listener(
-                self._handle_coordinator_update
-            )
-        )
-
     @property
     def native_value(self) -> str | None:
         """Return the current mode, first match wins."""
         if not (data := self.coordinator.data):
             return None
 
-        schedule = self._data.schedule_coordinator.data
-        if schedule is not None and schedule.global_disable:
-            return CONTROLLER_MODE_DISABLED
         if data.controller_state.delay_setting > 0:
             return CONTROLLER_MODE_RAIN_DELAYED
         if data.active_zones:

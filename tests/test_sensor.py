@@ -177,12 +177,17 @@ async def test_controller_mode_rain_delayed(
     assert hass.states.get(CONTROLLER_MODE).state == "rain_delayed"
 
 
-async def test_controller_mode_disabled(
+async def test_controller_mode_ignores_weather_adjustment_disable(
     hass: HomeAssistant,
     mock_create_controller: AsyncMock,
     config_entry: MockConfigEntry,
 ) -> None:
-    """A globally disabled controller outranks everything."""
+    """The weather-adjustment disable flag must NOT read as 'controller off'.
+
+    globalDisable in the weather adjustment mask disables seasonal/weather
+    adjustment, not irrigation. A controller with it set still waters, so the
+    mode must reflect what the controller is actually doing.
+    """
     mock_create_controller.get_weather_adjustment_mask.return_value = (
         WeatherAdjustmentMask(
             num_programs=3, program_opt_out_mask="07", global_disable=True
@@ -190,7 +195,7 @@ async def test_controller_mode_disabled(
     )
     mock_create_controller.get_zone_states.return_value = States("0400")
     await setup_integration(hass, config_entry)
-    assert hass.states.get(CONTROLLER_MODE).state == "disabled"
+    assert hass.states.get(CONTROLLER_MODE).state == "watering"
 
 
 async def test_controller_mode_exposes_device_clock(

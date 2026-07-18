@@ -55,8 +55,7 @@
         "state": {
           "idle": "Idle",
           "watering": "Watering",
-          "rain_delayed": "Rain delayed",
-          "disabled": "Disabled"
+          "rain_delayed": "Rain delayed"
         }
       },
       "zone_last_run_duration": { "name": "Zone {zone} last run duration" },

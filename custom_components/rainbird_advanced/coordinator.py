@@ -175,16 +175,7 @@ class RainbirdAdvScheduleCoordinator(DataUpdateCoordinator[RainbirdAdvScheduleDa
             timeline = schedule.timeline_tz(dt_util.DEFAULT_TIME_ZONE)
             programs = schedule.programs
 
-        global_disable = False
-        try:
-            mask = await controller.get_weather_adjustment_mask()
-        except RainbirdApiException as err:
-            _LOGGER.debug("Could not fetch weather adjustment mask: %s", err)
-        else:
-            global_disable = mask.global_disable
-
         return RainbirdAdvScheduleData(
             timeline=timeline,
             programs=programs,
-            global_disable=global_disable,
         )

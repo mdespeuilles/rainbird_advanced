@@ -55,8 +55,7 @@
         "state": {
           "idle": "Au repos",
           "watering": "Arrosage en cours",
-          "rain_delayed": "Arrosage reporté",
-          "disabled": "Désactivé"
+          "rain_delayed": "Arrosage reporté"
         }
       },
       "zone_last_run_duration": { "name": "Zone {zone} durée du dernier arrosage" },
