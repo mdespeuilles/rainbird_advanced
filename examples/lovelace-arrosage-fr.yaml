@@ -101,30 +101,28 @@ sections:
             name: Lancer le programme B
           - entity: button.rain_bird_controller_lancer_le_programme_c
             name: Lancer le programme C
+      # Le bloc "content" utilise "|" (littéral) pour préserver les sauts de
+      # ligne : indispensable pour que le markdown affiche titres et listes.
+      # Les programmes sans zones (non utilisés) sont masqués.
       - type: markdown
-        content: >
+        content: |
           {% set progs = [
             ['sensor.rain_bird_controller_programme_a', 'A'],
             ['sensor.rain_bird_controller_programme_b', 'B'],
             ['sensor.rain_bird_controller_programme_c', 'C'] ] %}
-          {% for eid, lettre in progs %}
-          {% if state_attr(eid, 'configured') %}
+          {% for eid, lettre in progs -%}
+          {% set zones = state_attr(eid, 'zones') %}
+          {% if zones %}
           ### Programme {{ lettre }}
 
-          Prochain départ :
-          **{{ as_timestamp(states(eid)) | timestamp_custom('%A %d %B à %H:%M', true)
-            if states(eid) not in ['unknown','unavailable'] else '—' }}**
+          Prochain départ : **{{ as_timestamp(states(eid)) | timestamp_custom('%A %d %B à %H:%M', true) if states(eid) not in ['unknown','unavailable'] else '—' }}**
 
-          Fréquence : {{ state_attr(eid, 'frequency') }} ·
-          Heure(s) : {{ state_attr(eid, 'start_times') | join(', ') }} ·
-          Total : {{ state_attr(eid, 'total_duration_minutes') }} min
+          Fréquence : {{ state_attr(eid, 'frequency') }} · Total : {{ state_attr(eid, 'total_duration_minutes') }} min
 
-          {% for z in state_attr(eid, 'zones') or [] -%}
-          • Zone {{ z.zone }} — {{ z.duration_minutes }} min
+          {% for z in zones -%}
+          - Zone {{ z.zone }} — {{ z.duration_minutes }} min
           {% endfor %}
-          {% else %}
-          ### Programme {{ lettre }} — non programmé
-          {% endif %}
+          {% endif -%}
           {% endfor %}
 
   - type: grid
