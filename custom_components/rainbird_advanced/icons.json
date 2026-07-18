@@ -1,0 +1,24 @@
+{
+  "entity": {
+    "sensor": {
+      "active_zone": { "default": "mdi:sprinkler-variant" },
+      "active_program": { "default": "mdi:calendar-clock" },
+      "controller_mode": {
+        "default": "mdi:water-pump",
+        "state": {
+          "idle": "mdi:water-pump-off",
+          "watering": "mdi:sprinkler",
+          "rain_delayed": "mdi:weather-rainy",
+          "disabled": "mdi:cancel"
+        }
+      },
+      "zone_last_run_duration": { "default": "mdi:timer-outline" },
+      "zone_last_run_at": { "default": "mdi:clock-outline" },
+      "zone_estimated_volume": { "default": "mdi:water" },
+      "zone_total_volume": { "default": "mdi:water-plus" }
+    }
+  },
+  "services": {
+    "raw_command": { "service": "mdi:console" }
+  }
+}

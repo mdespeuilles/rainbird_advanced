@@ -1,0 +1,13 @@
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "D", "ANN"]
+ignore = ["D203", "D213", "ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "ANN", "SLF001"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"

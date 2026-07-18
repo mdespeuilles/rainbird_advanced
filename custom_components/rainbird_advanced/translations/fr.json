@@ -1,0 +1,95 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Rain Bird Advanced",
+        "data": {
+          "host": "Hôte",
+          "password": "Mot de passe"
+        },
+        "data_description": {
+          "host": "L'adresse IP de votre module WiFi LNK2.",
+          "password": "Le mot de passe défini dans l'application Rain Bird."
+        }
+      },
+      "reauth_confirm": {
+        "description": "Le boîtier Rain Bird a refusé le mot de passe enregistré.",
+        "data": {
+          "password": "Mot de passe"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Échec de connexion",
+      "invalid_auth": "Mot de passe incorrect",
+      "device_busy": "Le contrôleur est occupé avec un autre client. Fermez l'application Rain Bird et réessayez.",
+      "unknown": "Erreur inattendue"
+    },
+    "abort": {
+      "already_configured": "Ce contrôleur est déjà configuré",
+      "no_mac": "Ce contrôleur n'a pas communiqué d'adresse MAC, indispensable pour l'identifier.",
+      "reauth_successful": "Ré-authentification réussie"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options Rain Bird Advanced",
+        "description": "Les débits servent à estimer le volume d'arrosage. Laissez une zone à 0 pour ne pas calculer son volume. Il n'y a aucun débitmètre : ce sont des estimations.",
+        "data": {
+          "scan_interval": "Intervalle d'interrogation"
+        },
+        "data_description": {
+          "scan_interval": "Fréquence d'interrogation du contrôleur. Les arrosages plus courts que cet intervalle ne sont pas enregistrés."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_zone": { "name": "Zone active" },
+      "active_program": { "name": "Programme actif" },
+      "controller_mode": {
+        "name": "Mode du contrôleur",
+        "state": {
+          "idle": "Au repos",
+          "watering": "Arrosage en cours",
+          "rain_delayed": "Arrosage reporté",
+          "disabled": "Désactivé"
+        }
+      },
+      "zone_last_run_duration": { "name": "Zone {zone} durée du dernier arrosage" },
+      "zone_last_run_at": { "name": "Zone {zone} dernier arrosage" },
+      "zone_estimated_volume": { "name": "Zone {zone} volume estimé" },
+      "zone_total_volume": { "name": "Zone {zone} volume total" }
+    }
+  },
+  "services": {
+    "raw_command": {
+      "name": "Commande brute",
+      "description": "Envoie une commande arbitraire au contrôleur, pour explorer le protocole et déboguer. Réservé aux administrateurs. Les commandes de lecture passent directement ; celles qui agissent sur le contrôleur exigent « Autoriser les commandes dangereuses ».",
+      "fields": {
+        "config_entry_id": {
+          "name": "Contrôleur",
+          "description": "Le contrôleur auquel envoyer la commande."
+        },
+        "command": {
+          "name": "Commande",
+          "description": "Un nom de commande SIP de pyrainbird (ex. ModelAndVersionRequest), ou un nom de méthode JSON-RPC (ex. getSettings) si le mode est rpc."
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "sip envoie une commande SIP encodée ; rpc appelle une méthode JSON-RPC sans argument."
+        },
+        "params": {
+          "name": "Paramètres",
+          "description": "Paramètres entiers positionnels de la commande SIP. Ignoré en mode rpc."
+        },
+        "allow_unsafe": {
+          "name": "Autoriser les commandes dangereuses",
+          "description": "Nécessaire pour les commandes qui agissent sur le contrôleur au lieu de le lire : démarrer ou arrêter un arrosage, changer l'heure. Laissez désactivé pour explorer."
+        }
+      }
+    }
+  }
+}

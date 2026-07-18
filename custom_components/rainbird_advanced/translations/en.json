@@ -1,0 +1,95 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Rain Bird Advanced",
+        "data": {
+          "host": "Host",
+          "password": "Password"
+        },
+        "data_description": {
+          "host": "The IP address of your LNK2 WiFi module.",
+          "password": "The device password set in the Rain Bird app."
+        }
+      },
+      "reauth_confirm": {
+        "description": "The Rain Bird device rejected the stored password.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid password",
+      "device_busy": "The controller is busy talking to another client. Close the Rain Bird app and try again.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This controller is already configured",
+      "no_mac": "This controller did not report a MAC address, which is required to identify it.",
+      "reauth_successful": "Re-authentication was successful"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Rain Bird Advanced options",
+        "description": "Flow rates are used to estimate watering volume. Leave a zone at 0 to leave its volume unknown. There is no flow meter: these are estimates.",
+        "data": {
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "scan_interval": "How often to poll the controller. Runs shorter than this interval are not recorded."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "active_zone": { "name": "Active zone" },
+      "active_program": { "name": "Active program" },
+      "controller_mode": {
+        "name": "Controller mode",
+        "state": {
+          "idle": "Idle",
+          "watering": "Watering",
+          "rain_delayed": "Rain delayed",
+          "disabled": "Disabled"
+        }
+      },
+      "zone_last_run_duration": { "name": "Zone {zone} last run duration" },
+      "zone_last_run_at": { "name": "Zone {zone} last run at" },
+      "zone_estimated_volume": { "name": "Zone {zone} estimated volume" },
+      "zone_total_volume": { "name": "Zone {zone} total volume" }
+    }
+  },
+  "services": {
+    "raw_command": {
+      "name": "Raw command",
+      "description": "Send an arbitrary command to the controller, for protocol exploration and debugging. Admin only. Read commands run as-is; commands that act on the controller require 'Allow unsafe commands'.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Controller",
+          "description": "The controller to send the command to."
+        },
+        "command": {
+          "name": "Command",
+          "description": "A SIP command name from pyrainbird (e.g. ModelAndVersionRequest), or a JSON-RPC method name (e.g. getSettings) when mode is rpc."
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "sip sends an encoded SIP command; rpc calls a zero-argument JSON-RPC method."
+        },
+        "params": {
+          "name": "Parameters",
+          "description": "Positional integer parameters for the SIP command. Ignored in rpc mode."
+        },
+        "allow_unsafe": {
+          "name": "Allow unsafe commands",
+          "description": "Required for commands that act on the controller instead of reading from it, such as starting or stopping watering or changing the clock. Leave off while exploring."
+        }
+      }
+    }
+  }
+}

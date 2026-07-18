@@ -1,0 +1,104 @@
+# Example Lovelace dashboard for rainbird_advanced.
+#
+# Entity ids assume the config entry is titled "ESP-TM2 Advanced". Adjust the
+# prefix to match yours, and drop zones you do not have.
+#
+# Add via Settings > Dashboards > Raw configuration editor.
+
+views:
+  - title: Irrigation
+    path: irrigation
+    icon: mdi:sprinkler-variant
+    cards:
+      # Only appears while something is actually watering.
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.esp_tm2_advanced_controller_mode
+            state: watering
+        card:
+          type: markdown
+          content: >-
+            ## Watering now
+
+            Zone **{{ states('sensor.esp_tm2_advanced_active_zone') }}** ·
+            {{ states('sensor.esp_tm2_advanced_active_program') }}
+
+            {% set zones = state_attr('sensor.esp_tm2_advanced_active_zone', 'active_zones') %}
+            {% if zones and zones | length > 1 %}
+            Also open: {{ zones[1:] | join(', ') }}
+            {% endif %}
+
+      - type: entities
+        title: Controller
+        entities:
+          - entity: sensor.esp_tm2_advanced_controller_mode
+            name: Mode
+            secondary_info: last-changed
+          - entity: sensor.esp_tm2_advanced_active_zone
+            name: Active zone
+          - entity: sensor.esp_tm2_advanced_active_program
+            name: Active program
+          - type: attribute
+            entity: sensor.esp_tm2_advanced_active_program
+            attribute: is_inferred
+            name: Program is a deduction
+
+      - type: entities
+        title: Last run per zone
+        state_color: true
+        entities:
+          - type: section
+            label: Zone 1
+          - entity: sensor.esp_tm2_advanced_zone_1_last_run_at
+            name: Last watered
+          - entity: sensor.esp_tm2_advanced_zone_1_last_run_duration
+            name: For
+          - entity: sensor.esp_tm2_advanced_zone_1_estimated_volume
+            name: Estimated volume
+          - type: section
+            label: Zone 2
+          - entity: sensor.esp_tm2_advanced_zone_2_last_run_at
+            name: Last watered
+          - entity: sensor.esp_tm2_advanced_zone_2_last_run_duration
+            name: For
+          - entity: sensor.esp_tm2_advanced_zone_2_estimated_volume
+            name: Estimated volume
+          - type: section
+            label: Zone 3
+          - entity: sensor.esp_tm2_advanced_zone_3_last_run_at
+            name: Last watered
+          - entity: sensor.esp_tm2_advanced_zone_3_last_run_duration
+            name: For
+          - entity: sensor.esp_tm2_advanced_zone_3_estimated_volume
+            name: Estimated volume
+
+      # Cumulative volume: this is the sensor eligible for the water dashboard.
+      - type: statistic
+        entity: sensor.esp_tm2_advanced_zone_1_total_volume
+        period:
+          calendar:
+            period: month
+        stat_type: change
+        name: Zone 1 water used this month
+
+      - type: history-graph
+        title: Watering history
+        hours_to_show: 72
+        entities:
+          - entity: sensor.esp_tm2_advanced_active_zone
+            name: Active zone
+          - entity: sensor.esp_tm2_advanced_controller_mode
+            name: Mode
+
+      - type: statistics-graph
+        title: Estimated volume per zone
+        chart_type: bar
+        period: day
+        days_to_show: 14
+        stat_types:
+          - change
+        entities:
+          - sensor.esp_tm2_advanced_zone_1_total_volume
+          - sensor.esp_tm2_advanced_zone_2_total_volume
+          - sensor.esp_tm2_advanced_zone_3_total_volume

@@ -1,0 +1,27 @@
+raw_command:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: rainbird_advanced
+    command:
+      required: true
+      example: ModelAndVersionRequest
+      selector:
+        text:
+    mode:
+      default: sip
+      selector:
+        select:
+          options:
+            - sip
+            - rpc
+    params:
+      example: "[0]"
+      selector:
+        object:
+    allow_unsafe:
+      default: false
+      selector:
+        boolean:
