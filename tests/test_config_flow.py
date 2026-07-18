@@ -13,6 +13,7 @@ from pyrainbird.data import WifiParams
 from pyrainbird.exceptions import (
     RainbirdApiException,
     RainbirdAuthException,
+    RainbirdCodingException,
     RainbirdDeviceBusyException,
 )
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -62,6 +63,10 @@ async def test_user_flow_success(
         (RainbirdDeviceBusyException("busy"), "device_busy"),
         (RainbirdApiException("boom"), "cannot_connect"),
         (TimeoutError(), "cannot_connect"),
+        # Separate exception root: a decode failure must not read as a bug.
+        (RainbirdCodingException("bad decode"), "cannot_connect"),
+        # A raw socket error that never got wrapped.
+        (OSError("connection reset"), "cannot_connect"),
     ],
 )
 async def test_user_flow_errors(
@@ -82,6 +87,30 @@ async def test_user_flow_errors(
 
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": expected}
+
+
+async def test_unexpected_error_surfaces_detail(
+    hass: HomeAssistant, mock_create_controller: AsyncMock
+) -> None:
+    """A truly unexpected error names its cause instead of a dead-end.
+
+    So a field report from the dialog is actionable rather than just
+    "unexpected error".
+    """
+    mock_create_controller.get_model_and_version.side_effect = RuntimeError(
+        "something weird"
+    )
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], USER_INPUT
+    )
+
+    assert result["errors"] == {"base": "unknown"}
+    assert "RuntimeError" in result["description_placeholders"]["error_detail"]
+    assert "something weird" in result["description_placeholders"]["error_detail"]
 
 
 async def test_user_flow_recovers_after_error(

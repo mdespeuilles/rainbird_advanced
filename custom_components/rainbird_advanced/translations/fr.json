@@ -20,10 +20,10 @@
       }
     },
     "error": {
-      "cannot_connect": "Échec de connexion",
+      "cannot_connect": "Échec de connexion. Vérifiez l'adresse IP et que le contrôleur est joignable.",
       "invalid_auth": "Mot de passe incorrect",
       "device_busy": "Le contrôleur est occupé avec un autre client. Fermez l'application Rain Bird et réessayez.",
-      "unknown": "Erreur inattendue"
+      "unknown": "Erreur inattendue : {error_detail}"
     },
     "abort": {
       "already_configured": "Ce contrôleur est déjà configuré",

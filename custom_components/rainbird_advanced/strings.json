@@ -20,10 +20,10 @@
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect",
+      "cannot_connect": "Failed to connect. Check the IP address and that the controller is reachable.",
       "invalid_auth": "Invalid password",
       "device_busy": "The controller is busy talking to another client. Close the Rain Bird app and try again.",
-      "unknown": "Unexpected error"
+      "unknown": "Unexpected error: {error_detail}"
     },
     "abort": {
       "already_configured": "This controller is already configured",

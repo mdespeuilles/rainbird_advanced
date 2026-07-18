@@ -27,6 +27,7 @@ from homeassistant.helpers.selector import (
 from pyrainbird.exceptions import (
     RainbirdApiException,
     RainbirdAuthException,
+    RainbirdCodingException,
     RainbirdDeviceBusyException,
 )
 
@@ -66,10 +67,7 @@ STEP_REAUTH_SCHEMA = vol.Schema(
 
 
 async def _async_validate(hass: Any, host: str, password: str) -> dict[str, Any]:
-    """Connect to the device and return its identity.
-
-    Raises a ValueError subclass keyed to a config-flow error string.
-    """
+    """Connect to the device and return its identity."""
     session = async_create_device_session(hass)
     try:
         async with asyncio.timeout(TIMEOUT_SECONDS):
@@ -78,6 +76,23 @@ async def _async_validate(hass: Any, host: str, password: str) -> dict[str, Any]
     finally:
         await session.close()
     return probe
+
+
+def _error_key(err: Exception) -> str:
+    """Map an exception to a config-flow error string."""
+    if isinstance(err, RainbirdAuthException):
+        return "invalid_auth"
+    if isinstance(err, RainbirdDeviceBusyException):
+        return "device_busy"
+    # RainbirdCodingException is a separate exception root (not a
+    # RainbirdApiException), and OSError covers raw socket failures that never
+    # got wrapped -- both mean "could not talk to the device", not a bug.
+    if isinstance(
+        err,
+        (RainbirdApiException, RainbirdCodingException, TimeoutError, OSError),
+    ):
+        return "cannot_connect"
+    return "unknown"
 
 
 class RainbirdAdvConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -90,22 +105,19 @@ class RainbirdAdvConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
+        placeholders: dict[str, str] = {}
         if user_input is not None:
             host = user_input[CONF_HOST].strip()
             password = user_input[CONF_PASSWORD]
             try:
                 probe = await _async_validate(self.hass, host, password)
-            except RainbirdAuthException:
-                errors["base"] = "invalid_auth"
-            except RainbirdDeviceBusyException:
-                # create_controller only falls back on connection errors, so a
-                # busy device surfaces here rather than being retried.
-                errors["base"] = "device_busy"
-            except RainbirdApiException, TimeoutError:
-                errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected error connecting to Rain Bird device")
-                errors["base"] = "unknown"
+            except Exception as err:  # noqa: BLE001
+                errors["base"] = _error_key(err)
+                if errors["base"] == "unknown":
+                    # Surface the real cause in the dialog rather than a dead-end
+                    # "unexpected error", so a field report is actionable.
+                    _LOGGER.exception("Unexpected error connecting to Rain Bird device")
+                    placeholders["error_detail"] = f"{type(err).__name__}: {err}"
             else:
                 mac_address = probe["mac_address"]
                 if not mac_address:
@@ -136,7 +148,10 @@ class RainbirdAdvConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
 
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_SCHEMA, errors=errors
+            step_id="user",
+            data_schema=STEP_USER_SCHEMA,
+            errors=errors,
+            description_placeholders=placeholders,
         )
 
     async def async_step_reauth(
@@ -155,12 +170,10 @@ class RainbirdAdvConfigFlow(ConfigFlow, domain=DOMAIN):
             password = user_input[CONF_PASSWORD]
             try:
                 await _async_validate(self.hass, entry.data[CONF_HOST], password)
-            except RainbirdAuthException:
-                errors["base"] = "invalid_auth"
-            except RainbirdDeviceBusyException:
-                errors["base"] = "device_busy"
-            except RainbirdApiException, TimeoutError:
-                errors["base"] = "cannot_connect"
+            except Exception as err:  # noqa: BLE001
+                errors["base"] = _error_key(err)
+                if errors["base"] == "unknown":
+                    _LOGGER.exception("Unexpected error during reauth")
             else:
                 return self.async_update_reload_and_abort(
                     entry, data_updates={CONF_PASSWORD: password}
