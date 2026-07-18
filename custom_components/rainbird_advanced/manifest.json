@@ -1,7 +1,7 @@
 {
   "domain": "rainbird_advanced",
   "name": "Rain Bird Advanced",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "codeowners": ["@mdespeuilles"],
   "config_flow": true,
   "documentation": "https://github.com/mdespeuilles/rainbird_advanced",

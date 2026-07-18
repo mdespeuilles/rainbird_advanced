@@ -29,6 +29,7 @@ supported by [pyrainbird][pyrainbird] should work, but are untested.
 | --- | --- |
 | `sensor.…_active_zone` | The zone currently watering. `active_zones` attribute lists all of them when several are open. |
 | `sensor.…_active_program` | The program believed to be running: `PGM A`/`B`/`C`, or `manual`. **Inferred** — see below. |
+| `sensor.…_program_A/B/C` | One per program. State is the **next run time**; attributes give the frequency (which days), start times, the zones **in watering order** with per-zone minutes, and the total duration. |
 | `sensor.…_controller_mode` | `idle` / `watering` / `rain_delayed` / `disabled`. **Not the physical dial** — see below. |
 | `sensor.…_zone_N_last_run_duration` | How long zone N last ran, in seconds. |
 | `sensor.…_zone_N_last_run_at` | When zone N last **started** watering. |

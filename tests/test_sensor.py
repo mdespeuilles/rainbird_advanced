@@ -332,3 +332,46 @@ async def test_timeline_is_built_in_home_assistant_timezone(
     event = next(iter(timeline))
     assert event.start.tzinfo is not None, "timeline events must be timezone-aware"
     assert event.start.utcoffset() == dt_util.now().utcoffset()
+
+
+async def test_program_detail_sensor(
+    hass: HomeAssistant,
+    mock_create_controller: AsyncMock,
+    config_entry: MockConfigEntry,
+) -> None:
+    """A per-program sensor exposes when it runs, which zones, and how long.
+
+    The conftest schedule is PGM A: daily at 06:00, zone 3 for 30 minutes.
+    """
+    await hass.config.async_set_time_zone("Europe/Paris")
+    await setup_integration(hass, config_entry)
+
+    state = hass.states.get("sensor.esp_tm2_advanced_program_a")
+    assert state is not None
+    attrs = state.attributes
+
+    assert attrs["configured"] is True
+    assert attrs["frequency"] == "Every day"
+    assert attrs["start_times"] == ["06:00"]
+    assert attrs["zones"] == [{"zone": 3, "duration_minutes": 30}]
+    assert attrs["total_duration_minutes"] == 30
+    # State is the next run timestamp (device_class timestamp -> ISO string).
+    assert state.state not in ("unknown", "unavailable")
+
+
+async def test_program_sensor_without_schedule(
+    hass: HomeAssistant,
+    mock_create_controller: AsyncMock,
+    config_entry: MockConfigEntry,
+) -> None:
+    """A program with no stored schedule reports configured=false, not a crash."""
+    from pyrainbird.exceptions import RainbirdDeviceNackError
+
+    mock_create_controller.get_schedule.side_effect = RainbirdDeviceNackError()
+    await setup_integration(hass, config_entry)
+
+    # Program B/C are not in the (single-program) conftest schedule.
+    state = hass.states.get("sensor.esp_tm2_advanced_program_b")
+    assert state is not None
+    assert state.attributes["configured"] is False
+    assert state.state in ("unknown", "unavailable")

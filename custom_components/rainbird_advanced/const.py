@@ -127,3 +127,10 @@ ATTR_DEVICE_TIME: Final = "device_time"
 ATTR_STARTED_AT: Final = "started_at"
 ATTR_ACTIVE_STATION: Final = "active_station"
 ATTR_IRRIGATION_STATE: Final = "irrigation_state"
+
+# Program-detail sensor attributes
+ATTR_CONFIGURED: Final = "configured"
+ATTR_FREQUENCY: Final = "frequency"
+ATTR_START_TIMES: Final = "start_times"
+ATTR_ZONES: Final = "zones"
+ATTR_TOTAL_DURATION: Final = "total_duration_minutes"

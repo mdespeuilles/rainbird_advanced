@@ -3,6 +3,7 @@
     "sensor": {
       "active_zone": { "default": "mdi:sprinkler-variant" },
       "active_program": { "default": "mdi:calendar-clock" },
+      "program": { "default": "mdi:calendar-text" },
       "controller_mode": {
         "default": "mdi:water-pump",
         "state": {

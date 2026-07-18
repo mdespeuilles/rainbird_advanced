@@ -15,25 +15,38 @@ from homeassistant.const import UnitOfTime, UnitOfVolume
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
+from pyrainbird.data import Program
 
 from .const import (
     ATTR_ACTIVE_STATION,
     ATTR_ACTIVE_ZONES,
+    ATTR_CONFIGURED,
     ATTR_DEVICE_TIME,
+    ATTR_FREQUENCY,
     ATTR_INFERENCE_BASIS,
     ATTR_IRRIGATION_STATE,
     ATTR_IS_INFERRED,
+    ATTR_START_TIMES,
     ATTR_STARTED_AT,
+    ATTR_TOTAL_DURATION,
     ATTR_UNRELIABLE,
+    ATTR_ZONES,
     CONTROLLER_MODE_DISABLED,
     CONTROLLER_MODE_IDLE,
     CONTROLLER_MODE_RAIN_DELAYED,
     CONTROLLER_MODE_WATERING,
     CONTROLLER_MODES,
 )
-from .entity import RainbirdAdvEntity
+from .entity import RainbirdAdvEntity, RainbirdAdvScheduleEntity
 from .models import RainbirdAdvConfigEntry, RainbirdAdvData
-from .program_infer import infer_active_program
+from .program_detail import (
+    frequency_text,
+    next_run,
+    start_times,
+    total_minutes,
+    zone_steps,
+)
+from .program_infer import infer_active_program, program_name
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,6 +66,10 @@ async def async_setup_entry(
         RainbirdActiveProgramSensor(data),
         RainbirdControllerModeSensor(data),
     ]
+    entities.extend(
+        RainbirdProgramSensor(data, program)
+        for program in range(data.model_info.model_info.max_programs)
+    )
     for zone in data.zones:
         entities.extend(
             [
@@ -199,6 +216,56 @@ class RainbirdControllerModeSensor(RainbirdAdvEntity, SensorEntity):
         return {
             ATTR_IRRIGATION_STATE: state.irrigation_state,
             ATTR_DEVICE_TIME: state.device_time.isoformat(),
+        }
+
+
+class RainbirdProgramSensor(RainbirdAdvScheduleEntity, SensorEntity):
+    """Details of one program: when it runs, which zones, and for how long.
+
+    Read directly from the stored schedule, so nothing here is inferred. The
+    state is the next run time; the breakdown is in the attributes.
+    """
+
+    _attr_translation_key = "program"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, data: RainbirdAdvData, program: int) -> None:
+        """Initialize the sensor."""
+        super().__init__(data)
+        self._program = program
+        letter = program_name(program).removeprefix("PGM ")
+        self._attr_unique_id = f"{data.mac_address}_program_{program}"
+        self._attr_translation_placeholders = {"program": letter}
+
+    def _program_data(self) -> Program | None:
+        """Return this sensor's program from the schedule, if present."""
+        if not (schedule := self.coordinator.data):
+            return None
+        for program in schedule.programs:
+            if program.program == self._program:
+                return program
+        return None
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return when the program next starts."""
+        if not (schedule := self.coordinator.data):
+            return None
+        return next_run(schedule.timeline, self._program, dt_util.now())
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return the schedule breakdown."""
+        program = self._program_data()
+        if program is None:
+            # The program exists as a button but has no stored schedule.
+            return {ATTR_CONFIGURED: False}
+        return {
+            ATTR_CONFIGURED: True,
+            ATTR_FREQUENCY: frequency_text(program),
+            ATTR_START_TIMES: start_times(program),
+            ATTR_ZONES: zone_steps(program),
+            ATTR_TOTAL_DURATION: total_minutes(program),
         }
 
 

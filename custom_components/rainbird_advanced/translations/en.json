@@ -49,6 +49,7 @@
     "sensor": {
       "active_zone": { "name": "Active zone" },
       "active_program": { "name": "Active program" },
+      "program": { "name": "Program {program}" },
       "controller_mode": {
         "name": "Controller mode",
         "state": {

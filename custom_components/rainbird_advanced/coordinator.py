@@ -163,6 +163,7 @@ class RainbirdAdvScheduleCoordinator(DataUpdateCoordinator[RainbirdAdvScheduleDa
         controller = self._api.controller
 
         timeline = None
+        programs: list = []
         try:
             schedule = await controller.get_schedule()
         except RainbirdDeviceNackError as err:
@@ -172,6 +173,7 @@ class RainbirdAdvScheduleCoordinator(DataUpdateCoordinator[RainbirdAdvScheduleDa
             # None for a naive now(), yielding a naive timeline that raises when
             # compared against an aware instant.
             timeline = schedule.timeline_tz(dt_util.DEFAULT_TIME_ZONE)
+            programs = schedule.programs
 
         global_disable = False
         try:
@@ -183,5 +185,6 @@ class RainbirdAdvScheduleCoordinator(DataUpdateCoordinator[RainbirdAdvScheduleDa
 
         return RainbirdAdvScheduleData(
             timeline=timeline,
+            programs=programs,
             global_disable=global_disable,
         )

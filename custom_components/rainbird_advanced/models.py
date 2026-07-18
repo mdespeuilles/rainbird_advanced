@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
-from pyrainbird.data import ControllerState, ModelAndVersion
+from pyrainbird.data import ControllerState, ModelAndVersion, Program
 from pyrainbird.timeline import ProgramTimeline
 
 if TYPE_CHECKING:
@@ -43,6 +43,9 @@ class RainbirdAdvScheduleData:
 
     timeline: ProgramTimeline | None
     """Program timeline, built in Home Assistant's timezone."""
+
+    programs: list[Program]
+    """The raw programs, so per-program detail sensors can describe them."""
 
     global_disable: bool
 
