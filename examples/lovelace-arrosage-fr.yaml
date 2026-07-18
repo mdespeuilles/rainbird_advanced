@@ -1,153 +1,156 @@
-# Onglet "Arrosage" pour Home Assistant (français), pensé pour Rain Bird Advanced.
+# Onglet "Arrosage" pour Home Assistant (français), format "sections"
+# (le format moderne des tableaux de bord HA), pensé pour Rain Bird Advanced.
 #
-# ⚠️ IMPORTANT — le préfixe des entités
-# Ci-dessous, toutes les entités commencent par "rain_bird_controller_".
-# C'est le nom de votre appareil transformé en identifiant. Si vos entités ont
-# un autre préfixe, faites un chercher/remplacer de "rain_bird_controller" par
-# le vôtre. Pour connaître vos identifiants exacts : Outils de développement →
-# Modèle (Template), collez ceci :
+# ⚠️ Le préfixe des entités
+# Les entités commencent par "rain_bird_controller_" (le nom de votre appareil).
+# Si un identifiant ne correspond pas chez vous, corrigez-le. Pour connaître vos
+# identifiants exacts : Outils de développement → Modèle (Template), collez :
 #
-#   {{ states.sensor | selectattr('entity_id','search','rain_bird')
+#   {{ states | selectattr('entity_id','search','rain_bird')
 #      | map(attribute='entity_id') | list }}
 #
-# Note : tant que l'intégration officielle est encore installée, certaines
-# entités peuvent porter un suffixe "_2". Les supprimer disparaît une fois
-# l'officielle retirée.
-#
-# Pour l'utiliser : Tableau de bord → ⋮ → Modifier → ⋮ → Modifier en YAML,
-# puis collez ce bloc sous "views:".
+# Pour l'utiliser : Tableau de bord → ⋮ → Modifier → bouton "+ Ajouter une vue"
+# → icône crayon de la vue → "Modifier en YAML", puis collez ce bloc entier.
 
+type: sections
 title: Arrosage
 path: arrosage
 icon: mdi:sprinkler-variant
-cards:
-  # --- Bandeau visible uniquement quand ça arrose ---
-  - type: conditional
-    conditions:
-      - entity: sensor.rain_bird_controller_mode_du_controleur
-        state: watering
-    card:
-      type: markdown
-      content: >
-        ## 💧 Arrosage en cours
+sections:
+  - type: grid
+    cards:
+      - type: heading
+        heading: État
+      - type: conditional
+        conditions:
+          - entity: sensor.rain_bird_controller_mode_du_controleur
+            state: watering
+        card:
+          type: markdown
+          content: >
+            ## 💧 Arrosage en cours
 
-        Zone **{{ states('sensor.rain_bird_controller_zone_active') }}** ·
-        {{ states('sensor.rain_bird_controller_programme_actif') }}
+            Zone **{{ states('sensor.rain_bird_controller_zone_active') }}** ·
+            {{ states('sensor.rain_bird_controller_programme_actif') }}
+      - type: glance
+        columns: 3
+        entities:
+          - entity: sensor.rain_bird_controller_mode_du_controleur
+            name: Mode
+          - entity: sensor.rain_bird_controller_zone_active
+            name: Zone active
+          - entity: binary_sensor.rain_bird_controller_capteur_de_pluie
+            name: Pluie
 
-  # --- Vue d'ensemble ---
-  - type: glance
-    title: État
-    columns: 3
-    entities:
-      - entity: sensor.rain_bird_controller_mode_du_controleur
-        name: Mode
-      - entity: sensor.rain_bird_controller_zone_active
-        name: Zone active
-      - entity: binary_sensor.rain_bird_controller_capteur_de_pluie
-        name: Pluie
+  - type: grid
+    cards:
+      - type: heading
+        heading: Zones
+      - type: entities
+        state_color: true
+        entities:
+          - entity: switch.rain_bird_controller_zone_1
+            name: Zone 1
+          - entity: switch.rain_bird_controller_zone_2
+            name: Zone 2
+          - entity: switch.rain_bird_controller_zone_3
+            name: Zone 3
+          - entity: switch.rain_bird_controller_zone_4
+            name: Zone 4
+          - entity: switch.rain_bird_controller_zone_5
+            name: Zone 5
+          - entity: switch.rain_bird_controller_zone_6
+            name: Zone 6
+          - type: divider
+          - entity: button.rain_bird_controller_arreter_l_arrosage
+            name: Tout arrêter
+          - entity: button.rain_bird_controller_zone_suivante
+            name: Zone suivante
 
-  # --- Marche/arrêt rapide des zones ---
-  - type: entities
-    title: Zones
-    state_color: true
-    entities:
-      - entity: switch.rain_bird_controller_zone_1
-        name: Zone 1
-      - entity: switch.rain_bird_controller_zone_2
-        name: Zone 2
-      - entity: switch.rain_bird_controller_zone_3
-        name: Zone 3
-      - entity: switch.rain_bird_controller_zone_4
-        name: Zone 4
-      - entity: switch.rain_bird_controller_zone_5
-        name: Zone 5
-      - entity: switch.rain_bird_controller_zone_6
-        name: Zone 6
-      - type: divider
-      - entity: button.rain_bird_controller_arreter_l_arrosage
-        name: Tout arrêter
-      - entity: button.rain_bird_controller_zone_suivante
-        name: Zone suivante
+  - type: grid
+    cards:
+      - type: heading
+        heading: Réglages
+      - type: entities
+        entities:
+          - entity: number.rain_bird_controller_zone_1_duree_d_arrosage
+            name: Durée zone 1
+          - entity: number.rain_bird_controller_zone_2_duree_d_arrosage
+            name: Durée zone 2
+          - entity: number.rain_bird_controller_zone_3_duree_d_arrosage
+            name: Durée zone 3
+          - entity: number.rain_bird_controller_zone_4_duree_d_arrosage
+            name: Durée zone 4
+          - entity: number.rain_bird_controller_zone_5_duree_d_arrosage
+            name: Durée zone 5
+          - entity: number.rain_bird_controller_zone_6_duree_d_arrosage
+            name: Durée zone 6
+          - type: divider
+          - entity: number.rain_bird_controller_report_pour_pluie
+            name: Report pour pluie (jours)
 
-  # --- Durées par zone + report pluie ---
-  - type: entities
-    title: Réglages
-    entities:
-      - entity: number.rain_bird_controller_zone_1_duree_d_arrosage
-        name: Durée zone 1
-      - entity: number.rain_bird_controller_zone_2_duree_d_arrosage
-        name: Durée zone 2
-      - entity: number.rain_bird_controller_zone_3_duree_d_arrosage
-        name: Durée zone 3
-      - entity: number.rain_bird_controller_zone_4_duree_d_arrosage
-        name: Durée zone 4
-      - entity: number.rain_bird_controller_zone_5_duree_d_arrosage
-        name: Durée zone 5
-      - entity: number.rain_bird_controller_zone_6_duree_d_arrosage
-        name: Durée zone 6
-      - type: divider
-      - entity: number.rain_bird_controller_report_pour_pluie
-        name: Report pour pluie (jours)
+  - type: grid
+    cards:
+      - type: heading
+        heading: Programmes
+      - type: entities
+        entities:
+          - entity: button.rain_bird_controller_lancer_le_programme_a
+            name: Lancer le programme A
+          - entity: button.rain_bird_controller_lancer_le_programme_b
+            name: Lancer le programme B
+          - entity: button.rain_bird_controller_lancer_le_programme_c
+            name: Lancer le programme C
+      - type: markdown
+        content: >
+          {% set progs = [
+            ['sensor.rain_bird_controller_programme_a', 'A'],
+            ['sensor.rain_bird_controller_programme_b', 'B'],
+            ['sensor.rain_bird_controller_programme_c', 'C'] ] %}
+          {% for eid, lettre in progs %}
+          {% if state_attr(eid, 'configured') %}
+          ### Programme {{ lettre }}
 
-  # --- Lancer un programme ---
-  - type: entities
-    title: Programmes
-    entities:
-      - entity: button.rain_bird_controller_lancer_le_programme_a
-        name: Lancer le programme A
-      - entity: button.rain_bird_controller_lancer_le_programme_b
-        name: Lancer le programme B
-      - entity: button.rain_bird_controller_lancer_le_programme_c
-        name: Lancer le programme C
+          Prochain départ :
+          **{{ as_timestamp(states(eid)) | timestamp_custom('%A %d %B à %H:%M', true)
+            if states(eid) not in ['unknown','unavailable'] else '—' }}**
 
-  # --- Détail des programmes (départ, zones, durées) ---
-  - type: markdown
-    title: Détail des programmes
-    content: >
-      {% set progs = [
-        ['sensor.rain_bird_controller_programme_a', 'A'],
-        ['sensor.rain_bird_controller_programme_b', 'B'],
-        ['sensor.rain_bird_controller_programme_c', 'C'] ] %}
-      {% for eid, lettre in progs %}
-      {% if state_attr(eid, 'configured') %}
-      ### Programme {{ lettre }}
+          Fréquence : {{ state_attr(eid, 'frequency') }} ·
+          Heure(s) : {{ state_attr(eid, 'start_times') | join(', ') }} ·
+          Total : {{ state_attr(eid, 'total_duration_minutes') }} min
 
-      Prochain départ :
-      **{{ as_timestamp(states(eid)) | timestamp_custom('%A %d %B à %H:%M', true)
-        if states(eid) not in ['unknown','unavailable'] else '—' }}**
+          {% for z in state_attr(eid, 'zones') or [] -%}
+          • Zone {{ z.zone }} — {{ z.duration_minutes }} min
+          {% endfor %}
+          {% else %}
+          ### Programme {{ lettre }} — non programmé
+          {% endif %}
+          {% endfor %}
 
-      Fréquence : {{ state_attr(eid, 'frequency') }} ·
-      Heure(s) : {{ state_attr(eid, 'start_times') | join(', ') }} ·
-      Total : {{ state_attr(eid, 'total_duration_minutes') }} min
+  - type: grid
+    cards:
+      - type: heading
+        heading: Dernier arrosage
+      - type: entities
+        entities:
+          - entity: sensor.rain_bird_controller_zone_1_dernier_arrosage
+            name: Zone 1
+          - entity: sensor.rain_bird_controller_zone_2_dernier_arrosage
+            name: Zone 2
+          - entity: sensor.rain_bird_controller_zone_3_dernier_arrosage
+            name: Zone 3
+          - entity: sensor.rain_bird_controller_zone_4_dernier_arrosage
+            name: Zone 4
+          - entity: sensor.rain_bird_controller_zone_5_dernier_arrosage
+            name: Zone 5
+          - entity: sensor.rain_bird_controller_zone_6_dernier_arrosage
+            name: Zone 6
 
-      {% for z in state_attr(eid, 'zones') or [] -%}
-      • Zone {{ z.zone }} — {{ z.duration_minutes }} min
-      {% endfor %}
-      {% else %}
-      ### Programme {{ lettre }} — non programmé
-      {% endif %}
-      {% endfor %}
-
-  # --- Historique du dernier arrosage par zone ---
-  - type: entities
-    title: Dernier arrosage
-    entities:
-      - entity: sensor.rain_bird_controller_zone_1_dernier_arrosage
-        name: Zone 1
-      - entity: sensor.rain_bird_controller_zone_2_dernier_arrosage
-        name: Zone 2
-      - entity: sensor.rain_bird_controller_zone_3_dernier_arrosage
-        name: Zone 3
-      - entity: sensor.rain_bird_controller_zone_4_dernier_arrosage
-        name: Zone 4
-      - entity: sensor.rain_bird_controller_zone_5_dernier_arrosage
-        name: Zone 5
-      - entity: sensor.rain_bird_controller_zone_6_dernier_arrosage
-        name: Zone 6
-
-  # --- Prochains arrosages planifiés ---
-  - type: calendar
-    title: Planning
-    initial_view: listWeek
-    entities:
-      - calendar.rain_bird_controller_planning_d_arrosage
+  - type: grid
+    cards:
+      - type: heading
+        heading: Planning
+      - type: calendar
+        initial_view: listWeek
+        entities:
+          - calendar.rain_bird_controller_planning_d_arrosage
